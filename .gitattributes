@@ -1,2 +1,168 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+'''
+WELCOME TO THE RSA ENCRYPTOR. THIS IS AN INTERACTIVE TOOL USED TO ENCRYPT OR DECRYPT A MESSAGE USING THE FAMOUS RSA ALGORITHM.
+ 
+PROGRAMMER: ANIRUDH GOTTIPARTHY
+'''
+ 
+import math
+ 
+print("RSA ENCRYPTOR/DECRYPTOR")
+print("*****************************************************")
+ 
+#Input Prime Numbers
+print("LÜTFEN AŞAĞIDAKİ 'p' VE 'q' DEĞERLERİNİ GİRİNİZ:")
+p = int(input("p için bir asal sayı girin: "))
+q = int(input("q için bir asal sayı girin:"))
+print("*****************************************************")
+ 
+#Girişlerin Asal olup olmadığını kontrol edin
+"GİRİŞLER ASAL VEYA DEĞİLDİR."
+def prime_check(a):
+    if(a==2):
+        return True
+    elif((a<2) or ((a%2)==0)):
+        return False
+    elif(a>2):
+        for i in range(2,a):
+            if not(a%i):
+                return false
+    return True
+ 
+check_p = prime_check(p)
+check_q = prime_check(q)
+while(((check_p==False)or(check_q==False))):
+    p = int(input("p için bir asal sayı girin: "))
+    q = int(input("q için bir asal sayı girin: "))
+    check_p = prime_check(p)
+    check_q = prime_check(q)
+ 
+#RSA Modül
+'''RSA MODÜLÜ 'n' HESAPLAMASI.'''
+n = p * q
+print("RSA Modülü(n):",n)
+ 
+#Eulers Toitent
+'''EULERS TOITENT 'r' HESAPLAMASI.'''
+r= (p-1)*(q-1)
+print("Eulers Toitent(r):",r)
+print("*****************************************************")
+ 
+#GCD
+'''e' HESAPLAMASI İÇİN OBEB HESAPLAMASI.'''
+def egcd(e,r):
+    while(r!=0):
+        e,r=r,e%r
+    return e
+ 
+#Öklid'in Algoritması
+def eugcd(e,r):
+    for i in range(1,r):
+        while(e!=0):
+            a,b=r//e,r%e
+            if(b!=0):
+                print("%d = %d*(%d) + %d"%(r,a,e,b))
+            r=e
+            e=b
+ 
+#Genişletilmiş Öklid Algoritması
+def eea(a,b):
+    if(a%b==0):
+        return(b,0,1)
+    else:
+        gcd,s,t = eea(b,a%b)
+        s = s-((a//b) * t)
+        print("%d = %d*(%d) + (%d)*(%d)"%(gcd,a,t,s,b))
+        return(gcd,t,s)
+ 
+#Çarpımsal Ters
+def mult_inv(e,r):
+    gcd,s,_=eea(e,r)
+    if(gcd!=1):
+        return None
+    else:
+        if(s<0):
+            print("s=%d. Since %d is less than 0, s = s(modr), i.e., s=%d."%(s,s,s%r))
+        elif(s>0):
+            print("s=%d."%(s))
+        return s%r
+ 
+#e Değer Hesaplama
+''''e''NİN 1 İLE 1000 ARASINDAKİ (e,r) KOPRİME YAPAN EN YÜKSEK DEĞERİNİ BULUR.'''
+for i in range(1,1000):
+    if(egcd(i,r)==1):
+        e=i
+print("e'nin değeri:",e)
+print("*****************************************************")
+ 
+#d, Özel ve Genel Anahtarlar
+'''d', ÖZEL ANAHTAR VE GENEL ANAHTARIN HESAPLANMASI.'''
+print("EUCLID'İN ALGORİTMASI:")
+eugcd(e,r)
+print("EUCLID'İN ALGORİTMASINA ULAŞMAK İÇİN KULLANILAN ADIMLARIN SONU.")
+print("*****************************************************")
+print("EUCLID'İN GENİŞLETİLMİŞ ALGORİTMASI:")
+d = mult_inv(e,r)
+print("'d' DEĞERİNE ULAŞMAK İÇİN KULLANILAN ADIMLARIN SONU.")
+print("d'nin değeri:",d)
+print("*****************************************************")
+public = (e,n)
+private = (d,n)
+print("Özel Anahtar:",private)
+print("Genel Anahtar:",public)
+print("*****************************************************")
+ 
+#Şifreleme
+'''ŞİFRELEME ALGORİTMASI.'''
+def encrypt(pub_key,n_text):
+    e,n=pub_key
+    x=[]
+    m=0
+    for i in n_text:
+        if(i.isupper()):
+            m = ord(i)-65
+            c=(m**e)%n
+            x.append(c)
+        elif(i.islower()):               
+            m= ord(i)-97
+            c=(m**e)%n
+            x.append(c)
+        elif(i.isspace()):
+            spc=400
+            x.append(400)
+    return x
+     
+ 
+#şifre çözme
+'''ŞİFRE ÇÖZME ALGORİTMASI'''
+def decrypt(priv_key,c_text):
+    d,n=priv_key
+    txt=c_text.split(',')
+    x=''
+    m=0
+    for i in txt:
+        if(i=='400'):
+            x+=' '
+        else:
+            m=(int(i)**d)%n
+            m+=65
+            c=chr(m)
+            x+=c
+    return x
+ 
+#Message
+message = input("Neyin şifrelenmesini veya şifresinin çözülmesini istersiniz?(Şifre çözme için ',' ile sayıları ayırın):")
+print("Mesajınız:",mesaj)
+ 
+#Şifrele veya Şifreyi Çöz ve Yazdır'ı seçin
+choose = input("Şifreleme için '1' ve şifre çözme için '2' yazın.")
+if(choose=='1'):
+    enc_msg=encrypt(public,message)
+    print("Şifrelenmiş mesajınız:",enc_msg)
+    print("RSA Şifreleyiciyi kullandığınız için teşekkür ederiz. Güle güle!")
+elif(choose=='2'):
+    print("Şifresi çözülmüş mesajınız:",decrypt(private,message))
+    print("RSA Şifreleyiciyi kullandığınız için teşekkür ederiz. Güle güle!")
+else:
+    print("Yanlış seçeneğe girdiniz.")
+    print("RSA Şifreleyiciyi kullandığınız için teşekkür ederiz. Güle güle!")
+
